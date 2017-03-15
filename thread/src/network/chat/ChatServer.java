@@ -89,9 +89,9 @@ public class ChatServer implements Runnable {
 
 		void removeMember( String rn ) {
 			for (int i = 0; i < vc.size(); i++) {
-			ChatService cs = ( ChatService ) vc.get(i+1);
+			ChatService cs = ( ChatService ) vc.get(i);
 				if (rn.equals(cs.myname) ) {
-					vc.remove(i+1);	
+					vc.remove(i);
 				}
 			}
 		}
