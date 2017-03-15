@@ -1,0 +1,13 @@
+package operator;
+
+public class ShiftTest {
+	public static void main(String[] args) {
+			//  398 = 3 * 10ÀÇ 2½Â + 9 * 10ÀÇ 1½Â + 8 * 10ÀÇ 0
+		
+		int a = -4;					 // 00000000 00000000 00000000 00000100 -ÀÏ°æ¿ì º¸¼ö
+		System.out.println( a << 1); // 00000000 00000000 00000000 00010000
+		System.out.println( a >> 1); // 00000000 00000000 00000000 00000010
+		System.out.println( a >>> 1);
+	}
+
+}
