@@ -42,7 +42,6 @@ class InfoTest implements ActionListener{
 
 		frame		= new JFrame("DBTest");
 
-
 		tf_name	= new JTextField(15);
 		tf_id		= new JTextField(15);
 		tf_tel		= new JTextField(15);
@@ -58,12 +57,11 @@ class InfoTest implements ActionListener{
 
 
 		b_show		= new JButton("Show");
-		b_search	= new JButton("Search");
+		b_search	= new JButton("Modify");
 		b_delete	= new JButton("Delete");
 		b_cancel	= new JButton("Cancel");
 		b_exit		= new JButton("Exit");
 		ta			= new JTextArea(20, 50);
-
 
 	}
 
@@ -127,8 +125,6 @@ class InfoTest implements ActionListener{
 	}
 
 	public void eventProc(){
-
-
 		// 버튼 이벤트 등록
 		b_add.addActionListener( this );
 		b_show.addActionListener( this );
@@ -148,8 +144,7 @@ class InfoTest implements ActionListener{
 			saveData();
 		}	else if( evt == b_show ){
 			readData();
-		} 	else if( evt == tf_tel ){
-			
+		} 	else if( evt == tf_tel ){			
 			search();
 		}	else if( evt == b_delete ){
 			removeData();
@@ -160,7 +155,42 @@ class InfoTest implements ActionListener{
 
 	}
 	void search(){
+		File f = new File("info.xml");
 		
+		try{
+		DocumentBuilderFactory docFac = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuild = docFac.newDocumentBuilder();
+		Document doc =  docBuild.parse(f);
+		
+		doc.getDocumentElement().normalize();
+		
+		NodeList personlist = doc.getElementsByTagName("person");
+		
+		for (int i = 0; i < personlist.getLength(); i++) {
+			Node temp = personlist.item(i);
+			NodeList childlist = temp.getChildNodes();
+			for (int j = 0; j<childlist.getLength(); j++) {
+				Node node = childlist.item(j);
+				if ( (node.getNodeName()).equals("tel")){								//"tel"과 node.getNodeName() 교체가능
+					String inputTel = tf_tel.getText();
+					if( inputTel.equals( node.getTextContent())){
+						Node n1 = node.getNextSibling();
+						tf_gender.setText( n1.getTextContent() );
+						Node n2 = n1.getNextSibling();
+						tf_age.setText( n2.getTextContent() );
+						Node n3 = n2.getNextSibling();
+						tf_home.setText( n3.getTextContent() );
+						Node n4 = node.getPreviousSibling();
+						tf_id.setText( n4.getTextContent() );
+						Node n5 = n4.getPreviousSibling();
+						tf_name.setText( n5.getTextContent());
+					}
+				}
+			}
+		}			
+		}catch(Exception e){
+			System.out.println("읽기 실패 : " + e.getMessage());
+		}
 	}
 	
 	void readData(){
