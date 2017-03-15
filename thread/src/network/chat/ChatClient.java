@@ -14,7 +14,7 @@ class ChatClient implements ActionListener, Runnable{
 	JFrame f;
 
 	JTextField connTF, sendTF;
-	JButton connB, sendB;
+	JButton connB, sendB, delete;
 	JTextArea ta;
 	
 	Socket s;
@@ -35,11 +35,13 @@ class ChatClient implements ActionListener, Runnable{
 	public ChatClient() {
 		f = new JFrame("Chat Client");
 		
+		
 		scrl = new JScrollPane();
 		connTF = new JTextField();
 		sendTF = new JTextField();
 		connB = new JButton("접 속");
 		sendB = new JButton("확 인");
+		delete = new JButton("강 퇴");
 		ta = new JTextArea(15,40);
 		
 		// 추가0: 대화명 바꾸기
@@ -74,6 +76,7 @@ class ChatClient implements ActionListener, Runnable{
 		p_east.setLayout( new BorderLayout());
 		p_east.add("North", new JLabel("   우 리 방 멤 버   "));
 		p_east.add("Center", memberList );
+		p_east.add("South", delete );
 		
 
 
@@ -100,10 +103,11 @@ class ChatClient implements ActionListener, Runnable{
 		connB.addActionListener(this);
 		sendTF.addActionListener(this);
 		sendB.addActionListener(this);
-
+		delete.addActionListener(this);
 		//  추가0: 대화명 바꾸기
 		changeNameTF.addActionListener(this);
 		changeNameB.addActionListener(this);
+		
 		
 	}// 생성자 종료
 	
@@ -121,11 +125,17 @@ class ChatClient implements ActionListener, Runnable{
 		//  추가0: 대화명 바꾸기
 		else if( o == changeNameTF || o == changeNameB ) {
 			changeNameProc();
+		}else if( o == delete ){
+			
 		}
 		
 	} // actionPerformed ends
 	
-
+	void deleteMember(){
+		String msg = (String) memberList.getSelectedValue();
+		
+	}
+	
 	void changeNameProc(){
 //		JOptionPane.showMessageDialog(null, "대화명바꾸기");
 		String msg = "/name " + changeNameTF.getText() + "\n";
