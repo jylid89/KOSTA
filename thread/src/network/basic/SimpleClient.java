@@ -7,7 +7,7 @@ import java.util.*;
 public class SimpleClient {
 	
 	public final static int PORT = 5000;
-	public final static String HOST = "127.0.0.1";
+	public final static String HOST = "192.168.0.122";
 	
 	public static void main( String args[] ) {
 		
@@ -18,7 +18,6 @@ public class SimpleClient {
 		// 콘솔 입력을 받기 위해
 		Scanner stdin = new Scanner( System.in );
 		
-
 		try{
 					
 		// 1. 서버에 연결하기 위해 소켓 생성

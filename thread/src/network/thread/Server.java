@@ -20,7 +20,7 @@ public  class Server extends Thread {
 	// 요청이 들어올 때마다 연결 상태를 새로이 생성
 	public void run() {
 		try{
-			while( true){
+			while( true ){
 					Socket client = listen.accept();
 					JuryThread cc = new JuryThread( client );	
 					System.out.println("클라이언트 입장 : " + client );
@@ -78,7 +78,7 @@ class JuryThread extends Thread{
 		*/
 		int result[] = new int [10];
 		for( int i=0 ; i<result.length ; i++ )
-			result[i] = a[i] + b[i];
+			result[i] = (a[i] / b[i]) * 100;
 		
 		/*******************************************
 		* 계산 결과를 다시 클라이언트로 보냄

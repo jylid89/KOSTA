@@ -5,14 +5,14 @@ import java.net.*;
 
 public class SimpleServer {
 	
-	public final static int PORT = 5000;	// PortNumer : 1024 ~
+	public final static int PORT = 5000;	// PortNumer : 1024
 	
 	public static void main( String args[] ) {
 		
 		ServerSocket 		server = null;
 		DataInputStream 	in = null;
-		DataOutputStream out = null;
-		Socket clientSocket = null;
+		DataOutputStream 	out = null;
+		Socket 				clientSocket = null;
 		
 		try{
 			// 1. 서버 소켓 생성
@@ -29,7 +29,7 @@ public class SimpleServer {
 				String line = in.readUTF();
 				System.out.println("we received : " + line );
 				if( line.compareTo("안녕") == 0 ) {
-					out.writeUTF("저도 반갑습니다." );	
+					out.writeUTF("저도 반갑습니다.");	
 				} else {
 					out.writeUTF("인사말이 아닙니다.");
 				}

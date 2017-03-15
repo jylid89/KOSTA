@@ -5,9 +5,12 @@ import java.awt.event.*;
 import java.net.*;
 import java.io.*;
 import javax.swing.*;
+
+import sun.management.snmp.util.SnmpNamedListTableCache;
+
 import java.util.*;
 
-class ChatClient implements ActionListener, Runnable {
+class ChatClient implements ActionListener, Runnable{
 	JFrame f;
 
 	JTextField connTF, sendTF;
@@ -17,6 +20,8 @@ class ChatClient implements ActionListener, Runnable {
 	Socket s;
 	BufferedReader in;
 	OutputStream out;
+	
+	JScrollPane scrl;
 
 	// 추가0 : 대화명을 바꾸기
 	JTextField changeNameTF;
@@ -30,7 +35,7 @@ class ChatClient implements ActionListener, Runnable {
 	public ChatClient() {
 		f = new JFrame("Chat Client");
 		
-
+		scrl = new JScrollPane();
 		connTF = new JTextField();
 		sendTF = new JTextField();
 		connB = new JButton("접 속");
@@ -73,41 +78,24 @@ class ChatClient implements ActionListener, Runnable {
 
 
 		f.getContentPane().add("North", p_north);
-		f.getContentPane().add("Center", new JScrollPane(ta));
+		scrl = new JScrollPane(ta);
+		f.getContentPane().add("Center", scrl);
 		f.getContentPane().add("South", p2);
 		f.getContentPane().add("East", p_east);
 		
+//		ta.setCaretPosition(ta.getDocument().getLength());
 		//f.setSize(500, 300);
 		f.pack();
 		f.setVisible(true);
 		
-
-		// 클라이언트 종료시
-		// 1. "종료"한다는 메세지를 서버에 보내기
-		// 2. 소켓및 스트림 닫기
-		// 3. 화면( 프레임) 안 보이기 하고
-		// 4. 자원 반납
-		// 5. 프로그램 나가기
-		//f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE );
-		f.addWindowListener( new WindowAdapter(){
-			public void windowClosing( WindowEvent ev){
-				if( s != null ){
-					try{
-					out.write(("/exit BYE\n").getBytes());
-
-					in.close();
-					out.close();
-					} catch(Exception ex){
-						System.out.println("종료시 에러:"+ex.getMessage());
-					}
-				}
-				f.setVisible(false);
-				f.dispose();
-				System.exit(0);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.addWindowListener(new WindowAdapter() {
+			
+			public void windowClosing(WindowEvent e) {
+				exitRoom();			
 			}
-		}
-		);
-
+			
+		});
 		connTF.addActionListener(this);
 		connB.addActionListener(this);
 		sendTF.addActionListener(this);
@@ -116,6 +104,7 @@ class ChatClient implements ActionListener, Runnable {
 		//  추가0: 대화명 바꾸기
 		changeNameTF.addActionListener(this);
 		changeNameB.addActionListener(this);
+		
 	}// 생성자 종료
 	
 	public void actionPerformed( ActionEvent e ) {
@@ -133,93 +122,93 @@ class ChatClient implements ActionListener, Runnable {
 		else if( o == changeNameTF || o == changeNameB ) {
 			changeNameProc();
 		}
+		
 	} // actionPerformed ends
 	
 
 	void changeNameProc(){
+//		JOptionPane.showMessageDialog(null, "대화명바꾸기");
+		String msg = "/name " + changeNameTF.getText() + "\n";
 		try{
-			out.write(("/name "+changeNameTF.getText() + "\n").getBytes());
-		} catch( Exception ex ) {
-			ta.append(ex + "\n" );
+		out.write(msg.getBytes());
+		}catch(Exception ex){
+			System.out.println("별칭부여실패 : " + ex.getMessage());
 		}
 	}
 
 	void connProc() {
+		//JOptionPane.showMessageDialog(null, "서버연결");
+		//1.소켓생성 (서버IP, 서버 PORT )
+		//2.입출력 스트립 얻어오기
 		try{
-			s.close();
-		}catch( Exception ex ) { }
-		
-		try{
-			s = new Socket(connTF.getText(), 1234 );
-			in = new BufferedReader( new InputStreamReader ( s.getInputStream()));
-			out = s.getOutputStream();
-			
-			new Thread(this).start();
-
-			// 추가1: 방에 첨 들어왔을때
-			enterRoom(); 
-		} catch(Exception ex) {
-			ta.append( ex.toString() );
+			s = new Socket( connTF.getText(), 1234);
+		in = new BufferedReader( new InputStreamReader (s.getInputStream()) );			//byte형을 문자형으로 변환해주는
+		out = s.getOutputStream();
+		new Thread( this ).start();
+		enterRoom();
+		}catch(Exception ex){
+			ta.append("접속실패 : " + ex.getMessage());
 		}
 	} // connProc ends
 	
-
-	void enterRoom(){
-		try{
-			out.write(("/start "+changeNameTF.getText() + "\n").getBytes());
-		} catch( Exception ex ) {
-			ta.append(ex + "\n" );
+		void enterRoom(){
+			String msg = "/start " + changeNameTF.getText() + "\n";
+			try{
+				out.write(msg.getBytes());
+			}catch(Exception ex){
+				System.out.println("방에 입장하지 못하였습니다" + ex.getMessage());
+			}
 		}
-	}
-
+		
+		void exitRoom(){
+			String msg = "/exit " + changeNameTF.getText() + "\n";
+			try{
+				out.write(msg.getBytes());
+			}catch(Exception ex){
+				System.out.println("방에서 나가지 못하였습니다" + ex.getMessage());
+			}
+		}
+	
 	void sendProc() {
+//		JOptionPane.showMessageDialog(null, "메세지보내기");
+		String msg = sendTF.getText() + "\n";
 		try{
-			out.write((sendTF.getText() + "\n").getBytes());
-			//sendTF.requestFocus();
-			sendTF.setText("");
-		} catch( Exception ex ) {
-			ta.append(ex + "\n" );
+		out.write(msg.getBytes());
+		sendTF.setText(null);
+		sendTF.requestFocus();
+		}catch(Exception ex){
+			System.out.println("전송실패 : " + ex.getMessage());
 		}
 	}// sendProc ends
-	
-	public void run() {
-		while(true) {
+
+	public void run()	{
+		while( s != null ){
 			try{
 				String msg = in.readLine();
-				if( msg == null ) return;
-
-				// 추가2: 새로운 멤버 리스트에 출력
-				StringTokenizer st = new StringTokenizer(msg);
-				if( st.countTokens() > 1 ) {
-					String temp = st.nextToken();
-					
-					if( temp.equalsIgnoreCase("/member" )) {
-						// 기존 벡터값 지우고 다시 서버에서 넘겨받아 벡터에 추가
-						list.removeAllElements();
-						while( st.hasMoreTokens() ){
-							temp = st.nextToken();
-							list.addElement( temp );
-							memberList.setListData( list );
-						}
-						continue;
-					}
-				}
-
-				// 화면에 넘겨받은 메세지 출력
-				ta.append( msg + "\n");
 				
-				// ta.setSelectionStart(ta.getText().length());  스크롤바 내리기
-			} catch( Exception ex ){ return; }
+				//서버로 온 신호 감지
+				StringTokenizer st = new StringTokenizer(msg);
+				String temp = st.nextToken();
+				if ( temp.equals("/member")) {
+					
+					list.removeAllElements();
+					
+					while(st.hasMoreTokens()) {
+						list.addElement(st.nextToken());
+						memberList.setListData(list);						
+					}
+					continue;
+				}
+								
+				ta.append(msg+"\n");
+			}catch(Exception ex){
+				ta.append("읽기 실패: " + ex.getMessage() + "\n");
+			}
+			scrl.getVerticalScrollBar().setValue(scrl.getVerticalScrollBar().getMaximum());
 		}
-	}// run ends
-	
+	}
 	public static void main(String [] args ) {
 		new ChatClient();
 	}
 	
 }// ChatClient ends
-			
-			
-
-	
-		
