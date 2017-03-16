@@ -178,7 +178,7 @@ class ChatClient implements ActionListener, Runnable{
 				System.out.println("방에서 나가지 못하였습니다" + ex.getMessage());
 			}
 		}
-	
+
 	void sendProc() {
 //		JOptionPane.showMessageDialog(null, "메세지보내기");
 		String msg = sendTF.getText() + "\n";

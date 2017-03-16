@@ -30,13 +30,10 @@ public class BadukClientMain extends JFrame
 			}
 		});
 	}
+	
 	public static void main(String[] args){
 		BadukClientMain main = new BadukClientMain(args[0], args[1]);
 		main.setSize(880,660);
 		main.setVisible(true);
 	}
 }
-
-
-
-

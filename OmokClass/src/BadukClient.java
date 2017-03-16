@@ -7,7 +7,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-class  BadukClient extends JPanel
+class  BadukClient extends JPanel implements ActionListener, Runnable
 {
 	// 생성자 기본 인자
 	String serverIP;
@@ -120,9 +120,53 @@ class  BadukClient extends JPanel
 		add("South", p_south );
 		add("Center", canvas );
 
-
+		//이벤트 등록
+		tfMessage.addActionListener(this);
+		btnGame.addActionListener(this);
+		btnStop.addActionListener(this);
+	}
+	public void actionPerformed(ActionEvent e) {
+		Object evt = e.getSource();
+		if( evt == tfMessage ){ chatSend(); }
+		else if( evt == btnGame ){ startGame(); }
+		else if( evt == btnStop ) {  }
+	}
+	void chatSend(){
+		String msg = tfMessage.getText();
+		if (msg.equals("")) return;
+		BadukClientProtocol obj = new BadukClientProtocol();
+		obj.setData(msg);
+		obj.setState(BadukClientProtocol.Chatting); 					//200으로 설정되어있지만 읽기 편하게 하기 위해
+		sendInformation(obj);
+		
+		tfMessage.setText("");
+		tfMessage.requestFocus();										//포커스를 맞춤
 	}
 
+	public void run(){
+		while( socClient != null ){
+			try{
+				BadukServerProtocol obj =( BadukServerProtocol )inStream.readObject(  );
+				int state = obj.getState();
+				Object data = obj.getData();
+				switch(state){
+				case BadukServerProtocol.Chatting : 		setChatting(data);
+				break;
+				case BadukServerProtocol.CHANGE_MEMBER_ID : addMemberId(data);
+				break;
+				case BadukServerProtocol.SET_BADUK_GAMMER : setBadukGammer(data);
+				break;
+				case BadukServerProtocol.START_GAME : 		startGameConfirm();
+				break;
+				case BadukServerProtocol.SET_BADUK_ROCK :	setBadukRock(data);
+				break;
+				}
+			}catch(Exception ex){
+				System.out.println("읽기 실패: " + ex.getMessage());
+			}
+		}
+	}
+	
 	//==================================================
 	/*	소켓클래스로 서버에 연결
 		1. 소켓클래스 생성 ( serverIP, port번호 )
@@ -130,20 +174,21 @@ class  BadukClient extends JPanel
 	*/
 	void connectServer(){
 		try{
-	
-
+			socClient = new Socket( serverIP, PORT );
+			inStream = new ObjectInputStream(socClient.getInputStream());		//byte형으로만 주고 X
+			outStream = new ObjectOutputStream(socClient.getOutputStream());
+			
+			System.out.println("서버연결 성공");
+			thread = new Thread( this );
+			thread.start();
+			
+			sendId();
+			
 		} catch(Exception ex){
 			JOptionPane.showMessageDialog(null, "서버 연결 실패 :"+ ex.getMessage() );
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
-
 	void sendInformation( BadukClientProtocol obj ){
 		try{
 			outStream.writeObject( obj );
@@ -172,8 +217,10 @@ class  BadukClient extends JPanel
 			: sendInfomation() 이용
 	*/
 	void sendId(){
-		
-		
+		BadukClientProtocol obj = new BadukClientProtocol();
+		obj.setState(BadukClientProtocol.SEND_ID);
+		obj.setData( id );
+		sendInformation( obj );
 	}
 
 	//---------------------------------------------------
@@ -183,7 +230,11 @@ class  BadukClient extends JPanel
 		3. String[] 배열값을 콤보박스에 하나씩 추가
 	*/
 	void addMemberId( Object data ){
-		
+		String [] str = (String [])data;
+			comMember.removeAllItems(); 							//콤보박스 지워주는 일
+		for (int i = 0; i < str.length; i++) {
+			comMember.addItem(str[i]);
+		}
 	}
 
 	//---------------------------------------------------
@@ -206,6 +257,10 @@ class  BadukClient extends JPanel
 		4. "게임하기" 버튼을 한번 누르면 비활성화
 	*/
 	void startGame(){
+		BadukClientProtocol obj = new BadukClientProtocol();
+		obj.setState(BadukClientProtocol.REQUEST_GAME);
+		sendInformation(obj);
+		btnGame.setEnabled(false);			//false로 하면 작동을 막음
 		
 	}
 
@@ -268,7 +323,10 @@ class  BadukClient extends JPanel
 		5. 캔버스를 다시 그리기
 	 */
 	void setBadukRock( Object data ){
-				
+		Baduk al = (Baduk)data;
+		
+		badukRock.add( al );
+		canvas.repaint();
 	}
 
 
@@ -290,8 +348,6 @@ class  BadukClient extends JPanel
 		tfOrder.setText("");
 		tfWinner.setText("");
 	}
-
-
 
 	//###################################################
 	/* 바둑판 모양을 만든 Canvas
@@ -367,7 +423,20 @@ class  BadukClient extends JPanel
 					( getYValue() 이용 )
 				4. 서버에 전송하기 위해 sendSetBaduk() 호출
 			 */
-			
+			addMouseListener( new MouseAdapter() {
+				
+				public void mouseReleased(MouseEvent e) {
+					Point pt = e.getPoint();
+					int col = getXValue(pt.x);
+					int row = getYValue(pt.y);
+					if( bGamming ){
+						if ( row < 0 || row > 18 || col < 0 || col > 18) {
+							return;
+						}
+						sendSetBaduk(row, col);
+					}
+				}
+			});			
 //--> 6
 		}
 
@@ -392,6 +461,5 @@ class  BadukClient extends JPanel
 		}
 
 
-	};
-	
+	}
 }

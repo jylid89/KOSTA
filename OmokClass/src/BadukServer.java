@@ -57,7 +57,7 @@ public class BadukServer  implements Runnable
 				System.out.println("Client 접속 : " + cs);    			
     		}
       }catch(Exception e){
-      
+    	  
       }
   }
 
@@ -95,7 +95,15 @@ public class BadukServer  implements Runnable
 		7. 모든 클라이언트에 전송 ( broadcast() 이용 )
 	*/
    public synchronized void sendAddMember(){
-
+	   String [] str = new String[member.size()];
+	   for(int i = 0 ; i < member.size() ; i++) {
+		   BadukService s = (BadukService) member.get(i);			//제네릭스를 적용한다면 향상된 for문등으로 간결해짐
+		   str[i] = s.getID();
+	   }
+	   BadukServerProtocol obj = new BadukServerProtocol();
+	   obj.setState( BadukServerProtocol.CHANGE_MEMBER_ID );		//BadukServerProtocol.CHANGE_MEMBER_ID로 상태 지정
+	   obj.setData( str );
+	   broadcast( obj );
   }
 
   // 종료시
@@ -124,7 +132,17 @@ public class BadukServer  implements Runnable
 		sendBadukGammer()를 이용하여 모든 클라이언트에 전송
    */
   public synchronized void requestGame(BadukService c){
-
+	  if( blackClient == null){
+		  blackClient = c;
+		  BadukServerProtocol p = sendBadukGammer();
+		  broadcast(p);
+		  
+	  }else if( whiteClient == null ){
+		  whiteClient =c;
+		  BadukServerProtocol p = sendBadukGammer();
+		  broadcast(p);
+	  }
+	  startGame();
    }
 
 
@@ -155,7 +173,7 @@ public class BadukServer  implements Runnable
 	바둑판정보 저장할 변수 초기화 한 후	모든 클라이언트에게 게임시작임을 전송
    */
   public synchronized void startGame(){
-		currentClient = blackClient;
+		currentClient = blackClient; 							//
   		badukRock = new Vector(5, 5);
   		badukPan = new int[19][19];
   		for ( int i = 0; i < 19; i++ )
@@ -178,8 +196,24 @@ public class BadukServer  implements Runnable
 	6. 모든 클라이언트에 SET_BADUK_ROCK 상태에 5번 객체를 전송
  */
   public synchronized void sendBadukRock(BadukService c, Object obj){
-
-
+	  if ( currentClient != c ) {
+		return;
+	}
+	  Vector v = (Vector)obj;
+	  int row = ((Integer)v.get(0)).intValue();		//int기본형 integer참조형이지만 버전이 높아서 가능함 intValue();
+	  int col = ((Integer)v.get(1)).intValue();
+	  
+	  int color = Baduk.BLACK_BADUK;
+	  if ( c == whiteClient ) {
+		color = Baduk.WHITE_BADUK;
+	}
+	  Baduk b = new Baduk(color, row, col);
+	  badukRock.add(b);
+	  
+	  BadukServerProtocol p = new BadukServerProtocol();
+	  p.setState(BadukServerProtocol.SET_BADUK_ROCK);
+	  p.setData(b);
+	  broadcast(p);
   }
 
 	//##################################################################

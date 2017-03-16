@@ -2,7 +2,7 @@
 //	클라이언트에서 서버로 전송할  데이타를 캡슐화한 클래스
 //=============================================================
 
-public class BadukClientProtocol implements java.io.Serializable
+public class BadukClientProtocol implements java.io.Serializable		//직렬화 - 스트림으로 클래스를 전달하지 못하기 때문에 
 {
 	//---------------------------------------------
 	// 클라이언트에서 서버로 전송시 상태값
