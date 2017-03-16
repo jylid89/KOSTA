@@ -56,7 +56,8 @@ public class BadukService extends Thread
 					case BadukClientProtocol.REQUEST_GAME : requestGame(); break;
 
 //--> 6				// 클라이언트가 바둑판에 클릭했을때의 바둑알정보를 받은 경우
-					case BadukClientProtocol.SET_BADUK_ROCK :  setBadukRock(data); break;					
+					case BadukClientProtocol.SET_BADUK_ROCK :  setBadukRock(data); break;	
+					
 				}
 			}
 		}catch(Exception ex){

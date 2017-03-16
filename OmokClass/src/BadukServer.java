@@ -79,7 +79,6 @@ public class BadukServer  implements Runnable
   		}
   }
 
-
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 //<-- 3
@@ -207,14 +206,29 @@ public class BadukServer  implements Runnable
 	  if ( c == whiteClient ) {
 		color = Baduk.WHITE_BADUK;
 	}
+	  if (badukPan[row][col] != -1) {
+		return;
+	}
 	  Baduk b = new Baduk(color, row, col);
-	  badukRock.add(b);
-	  
+	  	  
 	  BadukServerProtocol p = new BadukServerProtocol();
 	  p.setState(BadukServerProtocol.SET_BADUK_ROCK);
 	  p.setData(b);
 	  broadcast(p);
-  }
+	  
+	  badukPan[row][col] = color;				//주위에 같은 색이 있는지 검사하기 우해
+
+	  	
+	  if( isGame(b) ) {
+		  gameEnd();
+		  
+		  return;
+	  }
+	  
+	 //순서를 바꾸기
+	  if( currentClient == blackClient ) currentClient = whiteClient;
+	  else currentClient = blackClient;
+		  }
 
 	//##################################################################
 	/*  가장 최근에 놓여진 바둑알 정보를 기점으로 상하좌우대각선 방향으로
@@ -276,7 +290,7 @@ public class BadukServer  implements Runnable
 	*/
    public synchronized void gameEnd(){
 	    reStartInit(); 
-  	   	BadukServerProtocol  p = new BadukServerProtocol();
+  	   	BadukServerProtocol p = new BadukServerProtocol();
 		p.setState(BadukServerProtocol.END_GAME);
 		p.setData(winner);
   		broadcast(p);

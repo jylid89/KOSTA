@@ -129,8 +129,25 @@ class  BadukClient extends JPanel implements ActionListener, Runnable
 		Object evt = e.getSource();
 		if( evt == tfMessage ){ chatSend(); }
 		else if( evt == btnGame ){ startGame(); }
-		else if( evt == btnStop ) {  }
+		else if( evt == btnStop ) { 
+			stopGame();
+		}
 	}
+	
+	void stopGame() {
+		int result = JOptionPane.showConfirmDialog(null, "이대로 끝내시겠습니까??");
+		if(result == JOptionPane.OK_OPTION){
+			//전체 초기화
+			
+			btnGame.setEnabled(true);
+			
+		}else if( result == JOptionPane.NO_OPTION){
+			return;
+		}else if( result == JOptionPane.CANCEL_OPTION){
+			return;
+		}
+	}
+
 	void chatSend(){
 		String msg = tfMessage.getText();
 		if (msg.equals("")) return;
@@ -160,6 +177,7 @@ class  BadukClient extends JPanel implements ActionListener, Runnable
 				break;
 				case BadukServerProtocol.SET_BADUK_ROCK :	setBadukRock(data);
 				break;
+				
 				}
 			}catch(Exception ex){
 				System.out.println("읽기 실패: " + ex.getMessage());

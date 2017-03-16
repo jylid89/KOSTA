@@ -17,16 +17,15 @@ public class BadukClientMain extends JFrame
 		}else{
 			badukClient = new BadukClient(server, id);
 		}
-		getContentPane(). add(badukClient);
+		getContentPane().add(badukClient);
 		//setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-
 		
 //--> 3
 		// 종료시 서버에 나감을 알림
 		addWindowListener( new WindowAdapter(){
 			public void windowClosing( WindowEvent ev){
 				badukClient.sendExit();
-				System.exit(0);
+				System.exit(0);				
 			}
 		});
 	}
