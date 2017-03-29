@@ -16,7 +16,7 @@ public class BadukServerProtocol implements java.io.Serializable
 
 
 	Object 						data;
-	int                          state;
+	int                         state;
 	public BadukServerProtocol(){
 		
 	}

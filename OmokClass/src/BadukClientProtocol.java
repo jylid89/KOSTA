@@ -13,6 +13,7 @@ public class BadukClientProtocol implements java.io.Serializable		//직렬화 - 
 
 	public static final int			REQUEST_GAME =  0;
 	public static final int			VIEW_GAME    =  1;
+	public static final int 		SEND_DROP	 =  99;
 
 
     public static final int			SET_BADUK_ROCK    =  11;

@@ -137,8 +137,10 @@ class  BadukClient extends JPanel implements ActionListener, Runnable
 	void stopGame() {
 		int result = JOptionPane.showConfirmDialog(null, "이대로 끝내시겠습니까??");
 		if(result == JOptionPane.OK_OPTION){
-			//전체 초기화
-			
+			BadukClientProtocol obj = new BadukClientProtocol();
+			obj.setData(id);
+			obj.setState(BadukClientProtocol.SEND_DROP);
+			//전체 초기화			
 			btnGame.setEnabled(true);
 			
 		}else if( result == JOptionPane.NO_OPTION){
@@ -147,7 +149,7 @@ class  BadukClient extends JPanel implements ActionListener, Runnable
 			return;
 		}
 	}
-
+	
 	void chatSend(){
 		String msg = tfMessage.getText();
 		if (msg.equals("")) return;
